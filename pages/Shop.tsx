@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, CheckCircle, Plus, X, Star } from 'lucide-react';
-import { INVENTORY, PRICE_RANGES, parsePrice } from '../data';
+import { INVENTORY, PRICE_RANGES, formatPrice } from '../data';
 import { ProductImage } from '../components/ProductImage';
 
 const getFocusableElements = (container) => {
@@ -89,7 +89,7 @@ export const ShopPage = ({ onAddToCart }) => {
   const categoryItems = INVENTORY[activeCategory as keyof typeof INVENTORY];
   const brands = ["All", ...new Set(categoryItems.map(item => item.brand))];
   const filteredItems = categoryItems.filter(item => {
-    const price = parsePrice(item.price);
+    const price = item.price;
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBrand = selectedBrand === "All" || item.brand === selectedBrand;
     let matchesPrice = true;
@@ -206,7 +206,7 @@ export const ShopPage = ({ onAddToCart }) => {
                       <p className="text-sm text-gray-300"><span className="text-purple-400">Spec:</span> {item.flavor}</p>
                     </div>
                     <div className="flex items-center justify-between mt-auto">
-                      <span className="font-mono text-xl text-white font-bold">{item.price}</span>
+                      <span className="font-mono text-xl text-white font-bold">{formatPrice(item.price)}</span>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -276,7 +276,7 @@ export const ShopPage = ({ onAddToCart }) => {
                  </div>
                  
                  <div className="flex items-center gap-4 mt-4">
-                   <span className="text-3xl font-mono font-bold text-white">{quickViewProduct.price}</span>
+                   <span className="text-3xl font-mono font-bold text-white">{formatPrice(quickViewProduct.price)}</span>
                    <button 
                       onClick={() => {
                         handleAdd(quickViewProduct);

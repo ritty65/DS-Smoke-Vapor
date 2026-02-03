@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingBag, X, Menu, ShieldCheck, ShoppingCart, Trash2, Minus, Plus, Instagram, Heart, Share2 } from 'lucide-react';
-import { parsePrice } from './data';
+import { formatPrice } from './data';
 
 const getFocusableElements = (container) => {
   if (!container) return [];
@@ -160,7 +160,7 @@ const SocialLink = ({ href, ariaLabel, icon }) => (
 
 // --- Cart Drawer ---
 export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }) => {
-  const subtotal = cartItems.reduce((acc, item) => acc + (parsePrice(item.price) * item.quantity), 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const drawerRef = useRef(null);
   const previouslyFocusedRef = useRef(null);
 
@@ -260,7 +260,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
                     <p className="text-xs text-gray-400">{item.brand}</p>
                   </div>
                   <div className="flex justify-between items-end">
-                    <p className="font-mono text-green-400 font-bold">{item.price}</p>
+                    <p className="font-mono text-green-400 font-bold">{formatPrice(item.price)}</p>
                     <div className="flex items-center gap-3 bg-black/40 rounded-lg p-1">
                       <button 
                         onClick={() => onUpdateQty(item.name, -1)}
@@ -289,7 +289,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
           <div className="p-6 border-t border-white/10 bg-black/40">
             <div className="flex justify-between items-center mb-6">
               <span className="text-gray-400">Subtotal</span>
-              <span className="text-2xl font-mono font-bold text-white">${subtotal.toFixed(2)}</span>
+              <span className="text-2xl font-mono font-bold text-white">{formatPrice(subtotal)}</span>
             </div>
             <button 
               className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-bold text-black text-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all active:scale-[0.98]"
