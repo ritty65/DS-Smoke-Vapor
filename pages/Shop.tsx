@@ -190,9 +190,12 @@ export const ShopPage = ({ onAddToCart }) => {
                       {item.image ? (
                         <img
                           src={item.image}
-                          alt={`${item.brand} ${item.name}`}
+                          alt={item.imageAlt}
+                          width={item.imageWidth}
+                          height={item.imageHeight}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
+                          loading={item.imageLoading}
+                          sizes={item.imageSizes}
                         />
                       ) : (
                         <span className="text-4xl">📦</span>
@@ -250,7 +253,11 @@ export const ShopPage = ({ onAddToCart }) => {
                  {quickViewProduct.image ? (
                    <img
                      src={quickViewProduct.image}
-                     alt={`${quickViewProduct.brand} ${quickViewProduct.name}`}
+                     alt={quickViewProduct.imageAlt}
+                     width={quickViewProduct.imageWidth}
+                     height={quickViewProduct.imageHeight}
+                     loading={quickViewProduct.imageLoading}
+                     sizes={quickViewProduct.imageSizes}
                      className="h-full w-full object-cover"
                    />
                  ) : (
