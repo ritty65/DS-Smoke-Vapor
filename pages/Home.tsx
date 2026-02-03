@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Flame, Zap, CheckCircle, Plus, Heart, Share2, Star, Play, X, Smartphone, ChevronRight, ChevronLeft, Leaf, Wind, Droplets, Sparkles, Copy } from 'lucide-react';
 import { TiltCard } from '../components';
+import { ProductImage } from '../components/ProductImage';
 import { DEFAULT_DISCOUNT_CODE, DEFAULT_DISCOUNT_PERCENT } from '../config/rewards';
 import { FLOWER_STRAINS } from '../data/flowerStrains';
 
@@ -565,7 +566,7 @@ const FlowerShowcase = ({ onNavigate }) => {
                
                {/* Animated Key Image */}
                <div className="absolute inset-0">
-                 <img 
+                 <ProductImage 
                    key={activeIndex}
                    src={current.image} 
                    alt={current.imageAlt} 

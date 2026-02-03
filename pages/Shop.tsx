@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, CheckCircle, Plus, X, Star } from 'lucide-react';
 import { INVENTORY, PRICE_RANGES, parsePrice } from '../data';
+import { ProductImage } from '../components/ProductImage';
 
 const getFocusableElements = (container) => {
   if (!container) return [];
@@ -187,19 +188,15 @@ export const ShopPage = ({ onAddToCart }) => {
                   >
                     {item.tag && <div className="absolute top-2 right-2 bg-green-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{item.tag.toUpperCase()}</div>}
                     <div className="mb-4 h-40 rounded-lg overflow-hidden bg-black/40 flex items-center justify-center">
-                      {item.image ? (
-                        <img
-                          src={item.image}
-                          alt={item.imageAlt}
-                          width={item.imageWidth}
-                          height={item.imageHeight}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading={item.imageLoading}
-                          sizes={item.imageSizes}
-                        />
-                      ) : (
-                        <span className="text-4xl">📦</span>
-                      )}
+                      <ProductImage
+                        src={item.image}
+                        alt={item.imageAlt || `${item.name} product image`}
+                        width={item.imageWidth}
+                        height={item.imageHeight}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading={item.imageLoading}
+                        sizes={item.imageSizes}
+                      />
                     </div>
                     <div className="mb-2">
                       <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">{item.brand}</p>
@@ -250,19 +247,15 @@ export const ShopPage = ({ onAddToCart }) => {
              <div className="flex flex-col md:flex-row gap-8">
                <div className="w-full md:w-1/2 h-64 bg-white/5 rounded-xl flex items-center justify-center text-6xl relative overflow-hidden group">
                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                 {quickViewProduct.image ? (
-                   <img
-                     src={quickViewProduct.image}
-                     alt={quickViewProduct.imageAlt}
-                     width={quickViewProduct.imageWidth}
-                     height={quickViewProduct.imageHeight}
-                     loading={quickViewProduct.imageLoading}
-                     sizes={quickViewProduct.imageSizes}
-                     className="h-full w-full object-cover"
-                   />
-                 ) : (
-                   <span>📦</span>
-                 )}
+                 <ProductImage
+                   src={quickViewProduct.image}
+                   alt={quickViewProduct.imageAlt || `${quickViewProduct.name} product image`}
+                   width={quickViewProduct.imageWidth}
+                   height={quickViewProduct.imageHeight}
+                   loading={quickViewProduct.imageLoading}
+                   sizes={quickViewProduct.imageSizes}
+                   className="h-full w-full object-cover"
+                 />
                </div>
                
                <div className="flex-1 flex flex-col">
