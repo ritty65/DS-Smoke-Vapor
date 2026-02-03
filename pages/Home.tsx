@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Flame, Zap, CheckCircle, Plus, Heart, Share2, Star, Play, X, Smartphone, ChevronRight, ChevronLeft, Leaf, Wind, Droplets } from 'lucide-react';
 import { TiltCard } from '../components';
 
@@ -153,6 +153,123 @@ const VideoModal = ({ isOpen, onClose, videoId }) => {
   );
 };
 
+const PlayToWinModal = ({ isOpen, onClose }) => {
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const focusable = panelRef.current?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable?.[0];
+    const last = focusable?.[focusable.length - 1];
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key === 'Tab' && focusable?.length) {
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    first?.focus();
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm" role="presentation">
+      <div
+        className="absolute inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      ></div>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="play-to-win-title"
+        aria-describedby="play-to-win-description"
+        className="absolute right-0 top-0 h-full w-full max-w-lg bg-[#09090b] border-l border-white/10 shadow-[0_0_50px_rgba(34,197,94,0.3)] animate-in slide-in-from-right-12 duration-300"
+        ref={panelRef}
+      >
+        <div className="flex h-full flex-col p-8 gap-6 overflow-y-auto">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-green-400 mb-2">Play to Win</p>
+              <h2 id="play-to-win-title" className="text-3xl md:text-4xl font-black brand-font text-white">
+                Play to Win 20% Off
+              </h2>
+              <p id="play-to-win-description" className="text-sm text-gray-400 mt-2 max-w-sm">
+                Spin up the mini challenge, hit start, and see if you score a 20% off reward.
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full border border-white/10 text-white/70 hover:text-white hover:border-white/30 transition-colors"
+              aria-label="Close play to win panel"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+            <div className="flex items-center justify-between text-xs uppercase tracking-widest text-gray-400 mb-3">
+              <span>Play Area</span>
+              <span className="text-green-400 font-bold">Tries left: 3</span>
+            </div>
+            <svg
+              viewBox="0 0 320 180"
+              className="w-full h-48 rounded-xl bg-gradient-to-br from-green-500/10 via-purple-500/10 to-transparent border border-white/10"
+              role="img"
+              aria-label="Mini game canvas with targets"
+            >
+              <defs>
+                <linearGradient id="play-glow" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#22c55e" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0.4" />
+                </linearGradient>
+              </defs>
+              <rect x="16" y="16" width="288" height="148" rx="18" fill="rgba(0,0,0,0.4)" />
+              <circle cx="84" cy="88" r="32" fill="url(#play-glow)" opacity="0.8" />
+              <circle cx="160" cy="64" r="22" fill="rgba(34,197,94,0.6)" />
+              <circle cx="232" cy="104" r="28" fill="rgba(168,85,247,0.5)" />
+              <text x="160" y="92" textAnchor="middle" fill="white" fontSize="18" fontWeight="700">
+                Tap to Play
+              </text>
+            </svg>
+          </div>
+
+          <div className="mt-auto flex flex-col gap-3">
+            <button className="w-full px-6 py-3 rounded-xl bg-green-500 hover:bg-green-400 text-black font-black text-lg transition-all">
+              Start
+            </button>
+            <button
+              className="w-full px-6 py-3 rounded-xl border border-white/15 text-white/80 hover:text-white hover:border-white/40 transition-colors"
+              onClick={onClose}
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- FLOWER CAROUSEL COMPONENT ---
 const FlowerShowcase = ({ onNavigate }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -301,7 +418,7 @@ const FlowerShowcase = ({ onNavigate }) => {
 };
 
 // --- HERO COMPONENT ---
-const Hero = ({ onNavigate, onWatchVideo }) => (
+const Hero = ({ onNavigate, onWatchVideo, onPlay }) => (
   <div className="relative pt-24 pb-20 lg:pt-40 lg:pb-32 overflow-hidden min-h-[90vh] flex items-center justify-center bg-black">
     
     {/* YouTube Background */}
@@ -363,6 +480,15 @@ const Hero = ({ onNavigate, onWatchVideo }) => (
           className="cursor-pointer w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-black font-black text-lg rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] transition-all duration-300 flex items-center justify-center gap-2 group"
         >
           SHOP NOW <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+        </button>
+
+        <button
+          onClick={onPlay}
+          className="cursor-pointer w-full sm:w-auto px-8 py-4 bg-green-500/10 border border-green-500/60 text-green-200 font-bold text-lg rounded-full hover:bg-green-500/20 hover:border-green-400 transition-all duration-300 flex items-center justify-center gap-3 group hover:shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+          aria-haspopup="dialog"
+        >
+          <Play size={20} className="text-green-300" />
+          PLAY TO WIN 20% OFF
         </button>
         
         <button 
@@ -519,6 +645,7 @@ const Testimonials = () => (
 
 export const HomePage = ({ onNavigate, onAddToCart }) => {
   const [activeVideo, setActiveVideo] = useState(null);
+  const [isPlayOpen, setIsPlayOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -529,12 +656,14 @@ export const HomePage = ({ onNavigate, onAddToCart }) => {
       <Hero 
         onNavigate={onNavigate} 
         onWatchVideo={(id) => setActiveVideo(id)} 
+        onPlay={() => setIsPlayOpen(true)}
       />
       <VideoModal 
         isOpen={!!activeVideo} 
         onClose={() => setActiveVideo(null)} 
         videoId={activeVideo} 
       />
+      <PlayToWinModal isOpen={isPlayOpen} onClose={() => setIsPlayOpen(false)} />
       <Features />
       <CategoryPreview onNavigate={onNavigate} />
       <FlowerShowcase onNavigate={onNavigate} />
