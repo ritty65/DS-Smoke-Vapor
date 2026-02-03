@@ -9,4 +9,4 @@ export const PRICE_RANGES = [
   { label: "$100+", min: 100, max: Infinity }
 ];
 
-export const parsePrice = (priceStr) => parseFloat(priceStr.replace(/[^0-9.]/g, ''));
+export const formatPrice = (price) => `$${price.toFixed(2)}`;
