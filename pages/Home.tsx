@@ -161,6 +161,10 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
   const TARGET_PADDING = 18;
   const OVERLAP_THRESHOLD = 20;
   const MAX_TRIES = 3;
+  const ATTEMPT_STORAGE_KEY = 'playToWinAttempts';
+  const ATTEMPT_DATE_KEY = 'playToWinAttemptsDate';
+  const ATTEMPT_SESSION_KEY = 'playToWinSessionId';
+  const ATTEMPT_SYNC_ENDPOINT = '';
   const playAreaRef = useRef(null);
   const animationRef = useRef(null);
   const lastFrameRef = useRef(0);
@@ -176,9 +180,62 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
   const [copyStatus, setCopyStatus] = useState('Copy code');
   const panelRef = useRef(null);
   const confettiTimerRef = useRef(null);
+  const getTodayStamp = () => new Date().toISOString().slice(0, 10);
+  const getSessionId = () => {
+    if (typeof window === 'undefined') return 'anonymous';
+    const existing = window.localStorage.getItem(ATTEMPT_SESSION_KEY);
+    if (existing) return existing;
+    const generated = window.crypto?.randomUUID?.() ?? `session-${Date.now()}-${Math.random()}`;
+    window.localStorage.setItem(ATTEMPT_SESSION_KEY, generated);
+    return generated;
+  };
+  const persistAttempts = (nextTries) => {
+    if (typeof window === 'undefined') return;
+    const today = getTodayStamp();
+    window.localStorage.setItem(ATTEMPT_STORAGE_KEY, String(nextTries));
+    window.localStorage.setItem(ATTEMPT_DATE_KEY, today);
+  };
+  const syncAttempts = async (nextTries) => {
+    if (!ATTEMPT_SYNC_ENDPOINT || typeof window === 'undefined') return;
+    try {
+      await fetch(ATTEMPT_SYNC_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: getSessionId(),
+          triesLeft: nextTries,
+          date: getTodayStamp(),
+        }),
+      });
+    } catch (error) {
+      console.warn('Attempt sync failed', error);
+    }
+  };
+  const resetGameState = (nextTries = MAX_TRIES, locked = false) => {
+    setTriesLeft(nextTries);
+    setIsLocked(locked);
+    setIsSuccess(false);
+    setIsRewardVisible(false);
+    setRewardCode('');
+    setCopyStatus('Copy code');
+    setStatusMessage(locked ? 'Try again tomorrow.' : 'Tap or press space to play');
+    setPlayerPosition(null);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
+    if (typeof window !== 'undefined') {
+      const today = getTodayStamp();
+      const storedDate = window.localStorage.getItem(ATTEMPT_DATE_KEY);
+      const storedTries = Number(window.localStorage.getItem(ATTEMPT_STORAGE_KEY));
+      if (storedDate !== today || Number.isNaN(storedTries)) {
+        resetGameState(MAX_TRIES, false);
+        persistAttempts(MAX_TRIES);
+      } else {
+        const normalizedTries = Math.max(0, Math.min(MAX_TRIES, storedTries));
+        resetGameState(normalizedTries, normalizedTries <= 0);
+      }
+    }
     const focusable = panelRef.current?.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
@@ -260,15 +317,15 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen, isLocked, targetPosition, triesLeft]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    persistAttempts(triesLeft);
+    syncAttempts(triesLeft);
+  }, [isOpen, triesLeft]);
+
   const resetGame = () => {
     if (isLocked) return;
-    setTriesLeft(MAX_TRIES);
-    setIsSuccess(false);
-    setIsRewardVisible(false);
-    setRewardCode('');
-    setCopyStatus('Copy code');
-    setStatusMessage('Tap or press space to play');
-    setPlayerPosition(null);
+    resetGameState(MAX_TRIES, false);
   };
 
   const fetchRewardCode = async () => {
