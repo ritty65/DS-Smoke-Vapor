@@ -154,6 +154,22 @@ const VideoModal = ({ isOpen, onClose, videoId }) => {
 };
 
 const PlayToWinModal = ({ isOpen, onClose }) => {
+  const VIEWBOX = { width: 320, height: 180 };
+  const TARGET_RADIUS = 16;
+  const PLAYER_RADIUS = 18;
+  const TARGET_PADDING = 18;
+  const OVERLAP_THRESHOLD = 20;
+  const MAX_TRIES = 3;
+  const playAreaRef = useRef(null);
+  const animationRef = useRef(null);
+  const lastFrameRef = useRef(0);
+  const velocityRef = useRef({ x: 60, y: 45 });
+  const [targetPosition, setTargetPosition] = useState({ x: 96, y: 90 });
+  const [playerPosition, setPlayerPosition] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('Tap or press space to play');
+  const [triesLeft, setTriesLeft] = useState(MAX_TRIES);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const panelRef = useRef(null);
 
   useEffect(() => {
@@ -188,6 +204,96 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const animate = (timestamp) => {
+      if (!lastFrameRef.current) {
+        lastFrameRef.current = timestamp;
+      }
+      const delta = (timestamp - lastFrameRef.current) / 1000;
+      lastFrameRef.current = timestamp;
+      setTargetPosition((prev) => {
+        let nextX = prev.x + velocityRef.current.x * delta;
+        let nextY = prev.y + velocityRef.current.y * delta;
+        const minX = TARGET_PADDING;
+        const maxX = VIEWBOX.width - TARGET_PADDING;
+        const minY = TARGET_PADDING;
+        const maxY = VIEWBOX.height - TARGET_PADDING;
+        if (nextX <= minX || nextX >= maxX) {
+          velocityRef.current.x *= -1;
+          nextX = Math.min(Math.max(nextX, minX), maxX);
+        }
+        if (nextY <= minY || nextY >= maxY) {
+          velocityRef.current.y *= -1;
+          nextY = Math.min(Math.max(nextY, minY), maxY);
+        }
+        return { x: nextX, y: nextY };
+      });
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      lastFrameRef.current = 0;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleActionKey = (event) => {
+      if (event.code !== 'Space') return;
+      event.preventDefault();
+      if (isLocked) return;
+      handlePlayAction();
+    };
+    document.addEventListener('keydown', handleActionKey);
+    return () => {
+      document.removeEventListener('keydown', handleActionKey);
+    };
+  }, [isOpen, isLocked, targetPosition, triesLeft]);
+
+  const resetGame = () => {
+    if (isLocked) return;
+    setTriesLeft(MAX_TRIES);
+    setIsSuccess(false);
+    setStatusMessage('Tap or press space to play');
+    setPlayerPosition(null);
+  };
+
+  const handlePlayAction = (positionOverride) => {
+    if (isLocked) return;
+    const playerPos = positionOverride ?? { x: VIEWBOX.width / 2, y: VIEWBOX.height / 2 };
+    setPlayerPosition(playerPos);
+    const dx = playerPos.x - targetPosition.x;
+    const dy = playerPos.y - targetPosition.y;
+    const distance = Math.hypot(dx, dy);
+    const isHit = distance <= OVERLAP_THRESHOLD;
+    if (isHit) {
+      setIsSuccess(true);
+      setStatusMessage('Bullseye! You nailed it.');
+      return;
+    }
+    const updatedTries = triesLeft - 1;
+    setTriesLeft(updatedTries);
+    if (updatedTries <= 0) {
+      setIsLocked(true);
+      setStatusMessage('Try again tomorrow.');
+    } else {
+      setStatusMessage('Missed! Try again.');
+    }
+  };
+
+  const handleCanvasClick = (event) => {
+    if (isLocked) return;
+    const bounds = playAreaRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    const clickX = ((event.clientX - bounds.left) / bounds.width) * VIEWBOX.width;
+    const clickY = ((event.clientY - bounds.top) / bounds.height) * VIEWBOX.height;
+    handlePlayAction({ x: clickX, y: clickY });
+  };
 
   if (!isOpen) return null;
 
@@ -229,33 +335,68 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
           <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
             <div className="flex items-center justify-between text-xs uppercase tracking-widest text-gray-400 mb-3">
               <span>Play Area</span>
-              <span className="text-green-400 font-bold">Tries left: 3</span>
+              <span className={`${isLocked ? 'text-red-400' : 'text-green-400'} font-bold`}>
+                Tries left: {triesLeft}
+              </span>
             </div>
             <svg
               viewBox="0 0 320 180"
-              className="w-full h-48 rounded-xl bg-gradient-to-br from-green-500/10 via-purple-500/10 to-transparent border border-white/10"
+              className={`w-full h-48 rounded-xl bg-gradient-to-br from-green-500/10 via-purple-500/10 to-transparent border border-white/10 ${isLocked ? 'opacity-60' : 'cursor-crosshair'}`}
               role="img"
               aria-label="Mini game canvas with targets"
+              onClick={handleCanvasClick}
+              ref={playAreaRef}
             >
               <defs>
                 <linearGradient id="play-glow" x1="0" x2="1" y1="0" y2="1">
                   <stop offset="0%" stopColor="#22c55e" stopOpacity="0.9" />
                   <stop offset="100%" stopColor="#a855f7" stopOpacity="0.4" />
                 </linearGradient>
+                <radialGradient id="target-ring" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#22c55e" stopOpacity="0.2" />
+                </radialGradient>
               </defs>
               <rect x="16" y="16" width="288" height="148" rx="18" fill="rgba(0,0,0,0.4)" />
-              <circle cx="84" cy="88" r="32" fill="url(#play-glow)" opacity="0.8" />
-              <circle cx="160" cy="64" r="22" fill="rgba(34,197,94,0.6)" />
-              <circle cx="232" cy="104" r="28" fill="rgba(168,85,247,0.5)" />
-              <text x="160" y="92" textAnchor="middle" fill="white" fontSize="18" fontWeight="700">
-                Tap to Play
+              <circle
+                cx={targetPosition.x}
+                cy={targetPosition.y}
+                r={TARGET_RADIUS + 8}
+                fill="url(#play-glow)"
+                opacity="0.35"
+              />
+              <circle
+                cx={targetPosition.x}
+                cy={targetPosition.y}
+                r={TARGET_RADIUS}
+                fill="none"
+                stroke="url(#target-ring)"
+                strokeWidth="3"
+              />
+              {playerPosition && (
+                <circle
+                  cx={playerPosition.x}
+                  cy={playerPosition.y}
+                  r={PLAYER_RADIUS}
+                  fill="none"
+                  stroke={isSuccess ? '#22c55e' : '#f97316'}
+                  strokeWidth="3"
+                  strokeDasharray="6 4"
+                />
+              )}
+              <text x="160" y="92" textAnchor="middle" fill="white" fontSize="16" fontWeight="700">
+                {statusMessage}
               </text>
             </svg>
           </div>
 
           <div className="mt-auto flex flex-col gap-3">
-            <button className="w-full px-6 py-3 rounded-xl bg-green-500 hover:bg-green-400 text-black font-black text-lg transition-all">
-              Start
+            <button
+              className="w-full px-6 py-3 rounded-xl bg-green-500 hover:bg-green-400 text-black font-black text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={resetGame}
+              disabled={isLocked}
+            >
+              {isLocked ? 'Locked' : 'Reset'}
             </button>
             <button
               className="w-full px-6 py-3 rounded-xl border border-white/15 text-white/80 hover:text-white hover:border-white/40 transition-colors"
