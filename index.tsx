@@ -4,12 +4,13 @@ import { Navbar, Footer, AgeGate, AnnouncementBar, CartDrawer } from './componen
 import { HomePage } from './pages/Home';
 import { ShopPage } from './pages/Shop';
 import { LocationPage } from './pages/Location';
+import { AdminPage } from './pages/Admin';
 
 const App = () => {
   const [isAgeVerified, setIsAgeVerified] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
-  // Routing state: 'home', 'shop', 'location'
+  // Routing state: 'home', 'shop', 'location', 'admin'
   const [currentRoute, setCurrentRoute] = useState('home');
 
   useEffect(() => {
@@ -18,6 +19,30 @@ const App = () => {
       setIsAgeVerified(true);
     }
   }, []);
+
+  useEffect(() => {
+    const updateRouteFromLocation = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash.replace('#', '');
+      if (path === '/admin' || hash === 'admin') {
+        setCurrentRoute('admin');
+        return;
+      }
+      setCurrentRoute('home');
+    };
+
+    updateRouteFromLocation();
+    window.addEventListener('popstate', updateRouteFromLocation);
+    return () => window.removeEventListener('popstate', updateRouteFromLocation);
+  }, []);
+
+  useEffect(() => {
+    if (currentRoute === 'admin') {
+      window.history.replaceState({}, '', '/admin');
+      return;
+    }
+    window.history.replaceState({}, '', '/');
+  }, [currentRoute]);
 
   const handleVerification = () => {
     localStorage.setItem('age-verified', 'true');
@@ -59,6 +84,8 @@ const App = () => {
         return <ShopPage onAddToCart={addToCart} />;
       case 'location':
         return <LocationPage />;
+      case 'admin':
+        return <AdminPage />;
       case 'home':
       default:
         return <HomePage onNavigate={setCurrentRoute} onAddToCart={addToCart} />;
