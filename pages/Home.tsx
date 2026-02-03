@@ -16,7 +16,13 @@ const FLOWER_STRAINS = [
     thca: "24.5%", 
     flavor: "Nutty • Sour • Citrus", 
     desc: "A balanced hybrid offering a smooth, nutty profile with a sharp citrus finish.",
-    image: "https://images.unsplash.com/photo-1595781572981-d6315ccb25bc?q=80&w=2574&auto=format&fit=crop" 
+    image: "/assets/flower/amaretto-sour.svg",
+    imageAlt: "Amaretto Sour flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Apple N Banana", 
@@ -24,7 +30,13 @@ const FLOWER_STRAINS = [
     thca: "26.2%", 
     flavor: "Crisp Apple • Tropical", 
     desc: "Exploding with fruity terpenes, this strain delivers a creative and uplifting high.",
-    image: "https://images.unsplash.com/photo-1556928045-282035a55c8d?q=80&w=2671&auto=format&fit=crop" 
+    image: "/assets/flower/apple-n-banana.svg",
+    imageAlt: "Apple N Banana hybrid flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Apple Tartz", 
@@ -32,7 +44,13 @@ const FLOWER_STRAINS = [
     thca: "25.1%", 
     flavor: "Tart • Sweet • Earthy", 
     desc: "Like a fresh pastry, Apple Tartz combines sweet doughy notes with a tart kick.",
-    image: "https://images.unsplash.com/photo-1605335198038-f80e9803e484?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/apple-tartz.svg",
+    imageAlt: "Apple Tartz hybrid flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Birthday Crasher", 
@@ -40,7 +58,13 @@ const FLOWER_STRAINS = [
     thca: "23.8%", 
     flavor: "Vanilla • Cake • Berry", 
     desc: "Perfect for winding down, with heavy relaxation and a sweet, creamy aroma.",
-    image: "https://images.unsplash.com/photo-1628135248530-975932599602?q=80&w=2669&auto=format&fit=crop" 
+    image: "/assets/flower/birthday-crasher.svg",
+    imageAlt: "Birthday Crasher indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Black Truffle", 
@@ -48,7 +72,13 @@ const FLOWER_STRAINS = [
     thca: "22.4%", 
     flavor: "Savory • Earthy • Spicy", 
     desc: "A unique savory profile for the sophisticated palate. Deep relaxation awaits.",
-    image: "https://images.unsplash.com/photo-1536640523-86877990176b?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/black-truffle.svg",
+    imageAlt: "Black Truffle indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Bobcat", 
@@ -56,7 +86,13 @@ const FLOWER_STRAINS = [
     thca: "21.9%", 
     flavor: "Pine • Wood • Lemon", 
     desc: "Alert and energetic. Bobcat features classic piney notes with a zesty finish.",
-    image: "https://images.unsplash.com/photo-1595781572981-d6315ccb25bc?q=80&w=2574&auto=format&fit=crop" 
+    image: "/assets/flower/bobcat.svg",
+    imageAlt: "Bobcat sativa flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Cherry Sangria", 
@@ -64,7 +100,13 @@ const FLOWER_STRAINS = [
     thca: "24.2%", 
     flavor: "Dark Cherry • Wine", 
     desc: "Deep purple buds with a rich, fermented fruit aroma reminiscent of fine wine.",
-    image: "https://images.unsplash.com/photo-1603909223429-69bb71a1f420?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/cherry-sangria.svg",
+    imageAlt: "Cherry Sangria hybrid flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Donnie Burger", 
@@ -72,7 +114,13 @@ const FLOWER_STRAINS = [
     thca: "28.5%", 
     flavor: "Cheesy • Garlic • Gas", 
     desc: "Extremely potent with a funky, savory profile. Not for the faint of heart.",
-    image: "https://images.unsplash.com/photo-1617260029311-66551b8549ba?q=80&w=2574&auto=format&fit=crop" 
+    image: "/assets/flower/donnie-burger.svg",
+    imageAlt: "Donnie Burger indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Donut Shop", 
@@ -80,7 +128,13 @@ const FLOWER_STRAINS = [
     thca: "23.1%", 
     flavor: "Sweet • Dough • Glaze", 
     desc: "A dessert strain that melts away stress with its sugary, baked-goods scent.",
-    image: "https://images.unsplash.com/photo-1556928045-282035a55c8d?q=80&w=2671&auto=format&fit=crop" 
+    image: "/assets/flower/donut-shop.svg",
+    imageAlt: "Donut Shop indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Forbidden Runtz", 
@@ -88,7 +142,13 @@ const FLOWER_STRAINS = [
     thca: "25.4%", 
     flavor: "Tropical • Candy", 
     desc: "Exotic fruit flavors meet heavy indica effects. A vacation in every puff.",
-    image: "https://images.unsplash.com/photo-1628135248530-975932599602?q=80&w=2669&auto=format&fit=crop" 
+    image: "/assets/flower/forbidden-runtz.svg",
+    imageAlt: "Forbidden Runtz indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Frozen Dream", 
@@ -96,7 +156,13 @@ const FLOWER_STRAINS = [
     thca: "20.8%", 
     flavor: "Menthol • Sweet • Icy", 
     desc: "Cooling menthol notes with a clear-headed, dreamy sativa buzz.",
-    image: "https://images.unsplash.com/photo-1536640523-86877990176b?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/frozen-dream.svg",
+    imageAlt: "Frozen Dream sativa flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Gary Payton", 
@@ -104,7 +170,13 @@ const FLOWER_STRAINS = [
     thca: "22.7%", 
     flavor: "Pepper • Lavender • Gas", 
     desc: "A heavy hitter with high impact. Known for its strong gas and floral nose.",
-    image: "https://images.unsplash.com/photo-1605335198038-f80e9803e484?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/gary-payton.svg",
+    imageAlt: "Gary Payton hybrid flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Gelato", 
@@ -112,7 +184,13 @@ const FLOWER_STRAINS = [
     thca: "21.5%", 
     flavor: "Creamy • Berry • Sweet", 
     desc: "The classic. Creamy berry sweetness with a euphoric and relaxing effect.",
-    image: "https://images.unsplash.com/photo-1596489397633-87f5d688849b?q=80&w=2670&auto=format&fit=crop" 
+    image: "/assets/flower/gelato.svg",
+    imageAlt: "Gelato hybrid flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   },
   { 
     name: "Glitter Bomb", 
@@ -120,7 +198,13 @@ const FLOWER_STRAINS = [
     thca: "27.3%", 
     flavor: "Blueberry • Gas • Sweet", 
     desc: "Sparkling trichomes and explosive potency. A true knockout strain.",
-    image: "https://images.unsplash.com/photo-1617260029311-66551b8549ba?q=80&w=2574&auto=format&fit=crop" 
+    image: "/assets/flower/glitter-bomb.svg",
+    imageAlt: "Glitter Bomb indica flower strain",
+    imageWidth: 1600,
+    imageHeight: 1200,
+    imageSizes: "(min-width: 1024px) 50vw, 100vw",
+    imageLoading: "lazy",
+    imageCredit: "DS Smoke Vapor"
   }
 ];
 
@@ -683,7 +767,11 @@ const FlowerShowcase = ({ onNavigate }) => {
                  <img 
                    key={activeIndex}
                    src={current.image} 
-                   alt={current.name} 
+                   alt={current.imageAlt} 
+                   width={current.imageWidth}
+                   height={current.imageHeight}
+                   loading={current.imageLoading}
+                   sizes={current.imageSizes}
                    className="w-full h-full object-cover animate-in fade-in zoom-in-110 duration-1000"
                  />
                </div>
@@ -767,7 +855,7 @@ const Hero = ({ onNavigate, onWatchVideo, onPlay }) => (
     {/* YouTube Background */}
     <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
        {/* Fallback Image */}
-       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1533230504746-04423b497046?q=80&w=2576&auto=format&fit=crop')] bg-cover bg-center opacity-40"></div>
+       <div className="absolute inset-0 bg-[url('/assets/backgrounds/flower-room.svg')] bg-cover bg-center opacity-40"></div>
        
        {/* Overlays */}
        <div className="absolute inset-0 bg-black/50 z-10 mix-blend-overlay"></div>
