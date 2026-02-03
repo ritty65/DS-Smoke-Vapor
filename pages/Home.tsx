@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Flame, Zap, CheckCircle, Plus, Heart, Share2, Star, Play, X, Smartphone, ChevronRight, ChevronLeft, Leaf, Wind, Droplets } from 'lucide-react';
+import { ArrowRight, Flame, Zap, CheckCircle, Plus, Heart, Share2, Star, Play, X, Smartphone, ChevronRight, ChevronLeft, Leaf, Wind, Droplets, Sparkles, Copy } from 'lucide-react';
 import { TiltCard } from '../components';
+import { DEFAULT_DISCOUNT_CODE, DEFAULT_DISCOUNT_PERCENT } from '../config/rewards';
 
 // --- VIDEO CONFIGURATION ---
 const BACKGROUND_VIDEO_ID = "qC0vDKVPCdA"; // Abstract Purple Smoke Loop
@@ -170,7 +171,11 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
   const [triesLeft, setTriesLeft] = useState(MAX_TRIES);
   const [isLocked, setIsLocked] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isRewardVisible, setIsRewardVisible] = useState(false);
+  const [rewardCode, setRewardCode] = useState('');
+  const [copyStatus, setCopyStatus] = useState('Copy code');
   const panelRef = useRef(null);
+  const confettiTimerRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -259,8 +264,39 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     if (isLocked) return;
     setTriesLeft(MAX_TRIES);
     setIsSuccess(false);
+    setIsRewardVisible(false);
+    setRewardCode('');
+    setCopyStatus('Copy code');
     setStatusMessage('Tap or press space to play');
     setPlayerPosition(null);
+  };
+
+  const fetchRewardCode = async () => {
+    try {
+      const response = await fetch('/api/discounts/reward', { method: 'POST' });
+      if (!response.ok) {
+        throw new Error('Failed to fetch reward');
+      }
+      const data = await response.json();
+      if (data?.code) {
+        return data.code;
+      }
+    } catch (error) {
+      console.error('Reward code fallback used', error);
+    }
+    return DEFAULT_DISCOUNT_CODE;
+  };
+
+  const handleCopyCode = async () => {
+    if (!rewardCode) return;
+    try {
+      await navigator.clipboard.writeText(rewardCode);
+      setCopyStatus('Copied!');
+    } catch (error) {
+      console.error('Copy failed', error);
+      setCopyStatus('Copy failed');
+    }
+    window.setTimeout(() => setCopyStatus('Copy code'), 2000);
   };
 
   const handlePlayAction = (positionOverride) => {
@@ -274,6 +310,16 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     if (isHit) {
       setIsSuccess(true);
       setStatusMessage('Bullseye! You nailed it.');
+      fetchRewardCode().then((code) => {
+        setRewardCode(code);
+        setIsRewardVisible(true);
+      });
+      if (confettiTimerRef.current) {
+        window.clearTimeout(confettiTimerRef.current);
+      }
+      confettiTimerRef.current = window.setTimeout(() => {
+        setIsRewardVisible(false);
+      }, 9000);
       return;
     }
     const updatedTries = triesLeft - 1;
@@ -294,6 +340,12 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     const clickY = ((event.clientY - bounds.top) / bounds.height) * VIEWBOX.height;
     handlePlayAction({ x: clickX, y: clickY });
   };
+
+  useEffect(() => () => {
+    if (confettiTimerRef.current) {
+      window.clearTimeout(confettiTimerRef.current);
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -389,6 +441,39 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
               </text>
             </svg>
           </div>
+
+          {isSuccess && isRewardVisible && (
+            <div className="relative overflow-hidden rounded-2xl border border-green-400/30 bg-green-500/10 p-5">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="confetti-layer"></div>
+                <div className="confetti-layer confetti-delay"></div>
+              </div>
+              <div className="relative flex flex-col gap-4">
+                <div className="flex items-center gap-3 text-green-200">
+                  <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-green-300">Reward unlocked</p>
+                    <h3 className="text-2xl font-black text-white">{DEFAULT_DISCOUNT_PERCENT}% off code</h3>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-lg font-mono text-white">
+                    <span>{rewardCode}</span>
+                    <span className="text-xs uppercase tracking-widest text-green-300">One-time</span>
+                  </div>
+                  <button
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 text-white font-semibold hover:bg-white/20 transition-colors"
+                    onClick={handleCopyCode}
+                  >
+                    <Copy size={16} />
+                    {copyStatus}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-auto flex flex-col gap-3">
             <button
