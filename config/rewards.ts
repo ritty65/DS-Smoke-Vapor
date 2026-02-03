@@ -1,0 +1,2 @@
+export const DEFAULT_DISCOUNT_CODE = 'DSVAPOR20';
+export const DEFAULT_DISCOUNT_PERCENT = 20;
