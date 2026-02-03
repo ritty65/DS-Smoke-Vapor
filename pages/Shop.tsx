@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, CheckCircle, Plus, X, Star } from 'lucide-react';
 import { INVENTORY, PRICE_RANGES, parsePrice } from '../data';
+
+const getFocusableElements = (container) => {
+  if (!container) return [];
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'));
+};
 
 export const ShopPage = ({ onAddToCart }) => {
   const [activeCategory, setActiveCategory] = useState("Vapes");
@@ -10,6 +19,8 @@ export const ShopPage = ({ onAddToCart }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [addedItem, setAddedItem] = useState(null);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const quickViewRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   useEffect(() => {
     setSelectedBrand("All");
@@ -21,6 +32,52 @@ export const ShopPage = ({ onAddToCart }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    if (!quickViewProduct) return;
+
+    previouslyFocusedRef.current = document.activeElement;
+    const focusables = getFocusableElements(quickViewRef.current);
+    requestAnimationFrame(() => {
+      focusables[0]?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setQuickViewProduct(null);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const container = quickViewRef.current;
+      if (!container) return;
+      const elements = getFocusableElements(container);
+      if (elements.length === 0) return;
+
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocusedRef.current instanceof HTMLElement) {
+        previouslyFocusedRef.current.focus();
+      }
+    };
+  }, [quickViewProduct]);
 
   const handleAdd = (item) => {
     onAddToCart(item);
@@ -165,7 +222,14 @@ export const ShopPage = ({ onAddToCart }) => {
       {/* Quick View Modal */}
       {quickViewProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setQuickViewProduct(null)}>
-          <div className="bg-[#111] border border-white/10 rounded-2xl max-w-2xl w-full p-6 relative overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div
+            ref={quickViewRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Quick view"
+            className="bg-[#111] border border-white/10 rounded-2xl max-w-2xl w-full p-6 relative overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
              <button onClick={() => setQuickViewProduct(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
              
              <div className="flex flex-col md:flex-row gap-8">

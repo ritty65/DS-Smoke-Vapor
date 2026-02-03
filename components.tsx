@@ -2,6 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingBag, X, Menu, ShieldCheck, ShoppingCart, Trash2, Minus, Plus, Instagram, Heart, Share2 } from 'lucide-react';
 import { parsePrice } from './data';
 
+const getFocusableElements = (container) => {
+  if (!container) return [];
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((element) => !element.hasAttribute('disabled') && !element.getAttribute('aria-hidden'));
+};
+
 // --- Navbar ---
 export const Navbar = ({ cartCount, onToggleCart, currentRoute, onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -135,6 +144,56 @@ const SocialLink = ({ icon }) => (
 // --- Cart Drawer ---
 export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }) => {
   const subtotal = cartItems.reduce((acc, item) => acc + (parsePrice(item.price) * item.quantity), 0);
+  const drawerRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    previouslyFocusedRef.current = document.activeElement;
+    const focusables = getFocusableElements(drawerRef.current);
+    requestAnimationFrame(() => {
+      focusables[0]?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const container = drawerRef.current;
+      if (!container) return;
+      const elements = getFocusableElements(container);
+      if (elements.length === 0) return;
+
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocusedRef.current instanceof HTMLElement) {
+        previouslyFocusedRef.current.focus();
+      }
+    };
+  }, [isOpen, onClose]);
 
   return (
     <>
@@ -142,7 +201,13 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-[#0a0a0a] border-l border-white/10 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping cart"
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-[#0a0a0a] border-l border-white/10 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      >
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-purple-900/10">
           <h2 className="text-2xl font-black brand-font flex items-center gap-2">
             YOUR STASH <ShoppingBag className="text-purple-500" />
@@ -224,34 +289,92 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
 };
 
 // --- Age Gate ---
-export const AgeGate = ({ onVerify }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-md">
-    <div className="max-w-md w-full p-8 rounded-2xl border border-purple-500/30 bg-gray-900/80 text-center shadow-[0_0_50px_rgba(191,0,255,0.3)] mx-4">
-      <div className="mb-6 flex justify-center">
-        <ShieldCheck className="w-16 h-16 text-green-400 animate-pulse" />
-      </div>
-      <h2 className="text-3xl font-bold mb-2 brand-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-green-400">
-        AGE VERIFICATION
-      </h2>
-      <p className="text-gray-400 mb-8 font-light">You must be 21 years or older to enter this site. Please verify your age.</p>
-      
-      <div className="flex flex-col gap-4">
-        <button 
-          onClick={onVerify}
-          className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold text-white hover:scale-105 transition-transform duration-300 shadow-lg tracking-wider border border-purple-400/30 cursor-pointer"
-        >
-          I AM 21 OR OLDER
-        </button>
-        <button 
-          onClick={() => window.location.href = 'https://www.google.com'}
-          className="w-full py-4 bg-gray-800/50 hover:bg-gray-800 rounded-xl font-bold text-gray-400 transition-colors border border-gray-700 cursor-pointer"
-        >
-          EXIT
-        </button>
+export const AgeGate = ({ onVerify }) => {
+  const modalRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
+  const handleExit = () => {
+    window.location.href = 'https://www.google.com';
+  };
+
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement;
+    const focusables = getFocusableElements(modalRef.current);
+    requestAnimationFrame(() => {
+      focusables[0]?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        handleExit();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const container = modalRef.current;
+      if (!container) return;
+      const elements = getFocusableElements(container);
+      if (elements.length === 0) return;
+
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocusedRef.current instanceof HTMLElement) {
+        previouslyFocusedRef.current.focus();
+      }
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-md">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Age verification"
+        className="max-w-md w-full p-8 rounded-2xl border border-purple-500/30 bg-gray-900/80 text-center shadow-[0_0_50px_rgba(191,0,255,0.3)] mx-4"
+      >
+        <div className="mb-6 flex justify-center">
+          <ShieldCheck className="w-16 h-16 text-green-400 animate-pulse" />
+        </div>
+        <h2 className="text-3xl font-bold mb-2 brand-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-green-400">
+          AGE VERIFICATION
+        </h2>
+        <p className="text-gray-400 mb-8 font-light">You must be 21 years or older to enter this site. Please verify your age.</p>
+        
+        <div className="flex flex-col gap-4">
+          <button 
+            onClick={onVerify}
+            className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl font-bold text-white hover:scale-105 transition-transform duration-300 shadow-lg tracking-wider border border-purple-400/30 cursor-pointer"
+          >
+            I AM 21 OR OLDER
+          </button>
+          <button 
+            onClick={handleExit}
+            className="w-full py-4 bg-gray-800/50 hover:bg-gray-800 rounded-xl font-bold text-gray-400 transition-colors border border-gray-700 cursor-pointer"
+          >
+            EXIT
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- Announcement Bar ---
 export const AnnouncementBar = () => (
