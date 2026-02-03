@@ -169,6 +169,10 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
   const animationRef = useRef(null);
   const lastFrameRef = useRef(0);
   const velocityRef = useRef({ x: 60, y: 45 });
+  const attemptsUsedRef = useRef(0);
+  const hasStartedRef = useRef(false);
+  const startTimeRef = useRef(null);
+  const deviceTypeRef = useRef('unknown');
   const [targetPosition, setTargetPosition] = useState({ x: 96, y: 90 });
   const [playerPosition, setPlayerPosition] = useState(null);
   const [statusMessage, setStatusMessage] = useState('Tap or press space to play');
@@ -181,6 +185,29 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
   const panelRef = useRef(null);
   const confettiTimerRef = useRef(null);
   const getTodayStamp = () => new Date().toISOString().slice(0, 10);
+  const getDeviceType = () => {
+    if (typeof window === 'undefined') return 'unknown';
+    const userAgent = window.navigator?.userAgent ?? '';
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+      return 'mobile';
+    }
+    return 'desktop';
+  };
+  const trackAnalyticsEvent = (eventName, metadata) => {
+    if (typeof window === 'undefined') return;
+    const analyticsWindow = window;
+    if (typeof analyticsWindow.gtag === 'function') {
+      analyticsWindow.gtag('event', eventName, metadata);
+    }
+    if (Array.isArray(analyticsWindow.dataLayer)) {
+      analyticsWindow.dataLayer.push({ event: eventName, ...metadata });
+    }
+  };
+  const resetSessionTracking = () => {
+    attemptsUsedRef.current = 0;
+    hasStartedRef.current = false;
+    startTimeRef.current = null;
+  };
   const getSessionId = () => {
     if (typeof window === 'undefined') return 'anonymous';
     const existing = window.localStorage.getItem(ATTEMPT_SESSION_KEY);
@@ -224,6 +251,13 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (!isOpen) return;
+    resetSessionTracking();
+    deviceTypeRef.current = getDeviceType();
+    trackAnalyticsEvent('game_opened', {
+      attempts_used: attemptsUsedRef.current,
+      time_to_win: null,
+      device_type: deviceTypeRef.current,
+    });
     if (typeof window !== 'undefined') {
       const today = getTodayStamp();
       const storedDate = window.localStorage.getItem(ATTEMPT_DATE_KEY);
@@ -325,6 +359,7 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
 
   const resetGame = () => {
     if (isLocked) return;
+    resetSessionTracking();
     resetGameState(MAX_TRIES, false);
   };
 
@@ -358,6 +393,18 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
 
   const handlePlayAction = (positionOverride) => {
     if (isLocked) return;
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      startTimeRef.current = Date.now();
+    }
+    attemptsUsedRef.current += 1;
+    if (attemptsUsedRef.current === 1) {
+      trackAnalyticsEvent('game_started', {
+        attempts_used: attemptsUsedRef.current,
+        time_to_win: null,
+        device_type: deviceTypeRef.current,
+      });
+    }
     const playerPos = positionOverride ?? { x: VIEWBOX.width / 2, y: VIEWBOX.height / 2 };
     setPlayerPosition(playerPos);
     const dx = playerPos.x - targetPosition.x;
@@ -367,6 +414,14 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     if (isHit) {
       setIsSuccess(true);
       setStatusMessage('Bullseye! You nailed it.');
+      const timeToWinSeconds = startTimeRef.current
+        ? Number(((Date.now() - startTimeRef.current) / 1000).toFixed(2))
+        : null;
+      trackAnalyticsEvent('game_win', {
+        attempts_used: attemptsUsedRef.current,
+        time_to_win: timeToWinSeconds,
+        device_type: deviceTypeRef.current,
+      });
       fetchRewardCode().then((code) => {
         setRewardCode(code);
         setIsRewardVisible(true);
@@ -384,6 +439,11 @@ const PlayToWinModal = ({ isOpen, onClose }) => {
     if (updatedTries <= 0) {
       setIsLocked(true);
       setStatusMessage('Try again tomorrow.');
+      trackAnalyticsEvent('game_loss', {
+        attempts_used: attemptsUsedRef.current,
+        time_to_win: null,
+        device_type: deviceTypeRef.current,
+      });
     } else {
       setStatusMessage('Missed! Try again.');
     }
