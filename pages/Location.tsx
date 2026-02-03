@@ -73,7 +73,7 @@ export const LocationPage = () => {
               <h4 className="font-bold mb-4 flex items-center gap-2"><MessageSquare size={18} /> Quick Question?</h4>
               <div className="flex gap-2">
                 <input type="text" placeholder="Your email..." className="flex-1 bg-black/50 border border-white/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors" />
-                <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-lg transition-colors">
+                <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-lg transition-colors" aria-label="Send quick question">
                   <Send size={18} />
                 </button>
               </div>
@@ -82,6 +82,7 @@ export const LocationPage = () => {
 
           <div className="lg:w-1/2 h-96 lg:h-auto relative">
             <iframe 
+              title="DS Smoke & Vapor location map"
               width="100%" height="100%" 
               style={{border:0, filter: 'invert(90%) hue-rotate(180deg) contrast(120%)'}} 
               loading="lazy" allowFullScreen

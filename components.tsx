@@ -51,6 +51,7 @@ export const Navbar = ({ cartCount, onToggleCart, currentRoute, onNavigate }) =>
                <button 
                 onClick={onToggleCart}
                 className="relative p-2 text-gray-300 hover:text-green-400 transition-colors"
+                aria-label="Open cart"
                >
                   <ShoppingBag size={24} />
                   {cartCount > 0 && (
@@ -67,6 +68,7 @@ export const Navbar = ({ cartCount, onToggleCart, currentRoute, onNavigate }) =>
             <button 
                onClick={onToggleCart}
                className="relative p-2 text-gray-300"
+               aria-label="Open cart"
             >
                 <ShoppingBag size={24} />
                 {cartCount > 0 && (
@@ -78,6 +80,7 @@ export const Navbar = ({ cartCount, onToggleCart, currentRoute, onNavigate }) =>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-gray-300 hover:text-white p-2"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             >
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -119,13 +122,21 @@ export const Footer = () => (
       </div>
       
       <div className="flex gap-6">
-        <SocialLink icon={<Instagram />} />
-        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-blue-600 hover:text-white transition-all cursor-pointer">
-           <i className="fab fa-facebook-f text-xl"></i>
-        </div>
-        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-black hover:text-white transition-all cursor-pointer">
-           <i className="fab fa-tiktok text-xl"></i>
-        </div>
+        <SocialLink
+          href="https://www.instagram.com/dssmokevapor"
+          ariaLabel="Follow DS Smoke & Vapor on Instagram"
+          icon={<Instagram />}
+        />
+        <SocialLink
+          href="https://www.facebook.com/dssmokevapor"
+          ariaLabel="Follow DS Smoke & Vapor on Facebook"
+          icon={<i className="fab fa-facebook-f text-xl" aria-hidden="true"></i>}
+        />
+        <SocialLink
+          href="https://www.tiktok.com/@dssmokevapor"
+          ariaLabel="Follow DS Smoke & Vapor on TikTok"
+          icon={<i className="fab fa-tiktok text-xl" aria-hidden="true"></i>}
+        />
       </div>
     </div>
     <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-white/5 text-center md:text-left flex flex-col md:flex-row justify-between text-xs text-gray-600">
@@ -135,8 +146,14 @@ export const Footer = () => (
   </footer>
 );
 
-const SocialLink = ({ icon }) => (
-  <a href="#" className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white hover:scale-110 transition-all duration-300">
+const SocialLink = ({ href, ariaLabel, icon }) => (
+  <a
+    href={href}
+    aria-label={ariaLabel}
+    className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white hover:scale-110 transition-all duration-300"
+    target="_blank"
+    rel="noreferrer"
+  >
     {icon}
   </a>
 );
@@ -212,7 +229,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
           <h2 className="text-2xl font-black brand-font flex items-center gap-2">
             YOUR STASH <ShoppingBag className="text-purple-500" />
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors" aria-label="Close cart">
             <X size={24} />
           </button>
         </div>
@@ -236,7 +253,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
                   <div>
                     <div className="flex justify-between items-start">
                       <h4 className="font-bold text-sm line-clamp-1">{item.name}</h4>
-                      <button onClick={() => onRemove(item.name)} className="text-gray-500 hover:text-red-500 transition-colors">
+                      <button onClick={() => onRemove(item.name)} className="text-gray-500 hover:text-red-500 transition-colors" aria-label={`Remove ${item.name}`}>
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -249,6 +266,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
                         onClick={() => onUpdateQty(item.name, -1)}
                         className="p-1 hover:bg-white/10 rounded-md text-gray-400 hover:text-white disabled:opacity-30"
                         disabled={item.quantity <= 1}
+                        aria-label={`Decrease quantity of ${item.name}`}
                       >
                         <Minus size={14} />
                       </button>
@@ -256,6 +274,7 @@ export const CartDrawer = ({ isOpen, onClose, cartItems, onRemove, onUpdateQty }
                       <button 
                          onClick={() => onUpdateQty(item.name, 1)}
                          className="p-1 hover:bg-white/10 rounded-md text-gray-400 hover:text-white"
+                         aria-label={`Increase quantity of ${item.name}`}
                       >
                         <Plus size={14} />
                       </button>
