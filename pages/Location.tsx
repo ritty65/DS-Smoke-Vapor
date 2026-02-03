@@ -64,16 +64,17 @@ export const LocationPage = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-1 text-white">Call Us</h4>
-                  <p className="text-gray-300 hover:text-white transition-colors cursor-pointer">(555) 123-4567</p>
+                  <a href="tel:+15551234567" className="text-gray-300 hover:text-white transition-colors">(555) 123-4567</a>
                 </div>
               </div>
             </div>
 
             <div className="mt-auto bg-white/5 p-6 rounded-xl border border-white/10">
               <h4 className="font-bold mb-4 flex items-center gap-2"><MessageSquare size={18} /> Quick Question?</h4>
-              <div className="flex gap-2">
-                <input type="text" placeholder="Your email..." className="flex-1 bg-black/50 border border-white/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors" />
-                <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded-lg transition-colors" aria-label="Send quick question">
+              <p className="text-sm text-gray-400 mb-3">Online questions are coming soon. For now, please call or stop by and we’ll help right away.</p>
+              <div className="flex gap-2 opacity-60">
+                <input type="text" placeholder="Email capture coming soon" className="flex-1 bg-black/50 border border-white/20 rounded-lg px-4 py-2 text-sm cursor-not-allowed" disabled />
+                <button className="bg-purple-600 text-white p-2 rounded-lg cursor-not-allowed" aria-label="Send quick question (coming soon)" disabled>
                   <Send size={18} />
                 </button>
               </div>
